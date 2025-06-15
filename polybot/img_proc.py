@@ -36,7 +36,7 @@ class Img:
             row_result = []
             for j in range(width - blur_level + 1):
                 sub_matrix = [row[j:j + blur_level] for row in self.data[i:i + blur_level]]
-                average = sum(sum(sub_row) for sub_row in sub_matrix) / filter_size  # Changed // to /
+                average = sum(sum(sub_row) for sub_row in sub_matrix) / filter_size  # Division fixed here
                 row_result.append(average)
             result.append(row_result)
 
@@ -70,6 +70,11 @@ class Img:
             i = random.randint(0, height - 1)
             j = random.randint(0, width - 1)
             self.data[i][j] = 0.0
+
+        # בדוק כמה פיקסלים לבנים יש בפועל (עם סף > 0.99)
+        white_pixels = sum(1 for row in self.data for pixel in row if pixel > 0.99)
+        white_percentage = white_pixels / total_pixels
+        print(f"White pixels added: {white_pixels} out of {total_pixels} ({white_percentage:.2%})")
 
     def concat(self, other_img, direction='horizontal'):
         if direction == 'horizontal':
