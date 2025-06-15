@@ -43,7 +43,7 @@ class Img:
 
     def rotate(self):
         # Rotate 90 degrees clockwise
-        self.data = np.rot90(self.data, k=3)  # equivalent to rotating right
+        self.data = np.rot90(self.data, k=3)
 
     def salt_n_pepper(self):
         height, width = self.data.shape
@@ -81,10 +81,3 @@ class Img:
     def segment(self):
         threshold = 0.5
         self.data = np.where(self.data > threshold, 1.0, 0.0)
-row[:min_width] for row in other_img.data
-
-        self.data = new_data
-
-    def segment(self):
-        threshold = 0.5
-        self.data = [[1.0 if pixel > threshold else 0.0 for pixel in row] for row in self.data]
