@@ -12,10 +12,16 @@ def rgb2gray(rgb):
 class Img:
 
     def __init__(self, path):
+        """
+        Do not change the constructor implementation
+        """
         self.path = Path(path)
         self.data = rgb2gray(imread(path)).tolist()
 
     def save_img(self):
+        """
+        Do not change the below implementation
+        """
         new_path = self.path.with_name(self.path.stem + '_filtered' + self.path.suffix)
         imsave(new_path, self.data, cmap='gray')
         return new_path
@@ -24,8 +30,8 @@ class Img:
         height = len(self.data)
         width = len(self.data[0])
         filter_sum = blur_level ** 2
-        result = []
 
+        result = []
         for i in range(height - blur_level + 1):
             row_result = []
             for j in range(width - blur_level + 1):
@@ -40,34 +46,10 @@ class Img:
         for i, row in enumerate(self.data):
             res = []
             for j in range(1, len(row)):
-                res.append(abs(row[j-1] - row[j]))
+                res.append(abs(row[j - 1] - row[j]))
             self.data[i] = res
 
     def rotate(self):
-        self.data = [list(row) for row in zip(*self.data[::-1])]
+        self.data = [list(reversed(col)) for col in zip(*self.data)]
 
     def salt_n_pepper(self):
-        height = len(self.data)
-        width = len(self.data[0])
-        amount = int(0.05 * height * width)  # 5% noise
-
-        for _ in range(amount):
-            i = random.randint(0, height - 1)
-            j = random.randint(0, width - 1)
-            self.data[i][j] = 0 if random.random() < 0.5 else 1
-
-    def concat(self, other_img, direction='horizontal'):
-        if direction == 'horizontal':
-            min_height = min(len(self.data), len(other_img.data))
-            self.data = [self_row[:]+other_row[:]
-                         for self_row, other_row in zip(self.data[:min_height], other_img.data[:min_height])]
-        else:
-            min_width = min(len(self.data[0]), len(other_img.data[0]))
-            top = [row[:min_width] for row in self.data]
-            bottom = [row[:min_width] for row in other_img.data]
-            self.data = top + bottom
-
-    def segment(self):
-        for i in range(len(self.data)):
-            for j in range(len(self.data[0])):
-                self.data[i][j] = 1 if self.data[i][j] > 0.5 else 0
