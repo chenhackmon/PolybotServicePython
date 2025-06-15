@@ -38,11 +38,9 @@ class Img:
         self.data = np.array(result)
 
     def contour(self):
-        # compute abs diff horizontally
         self.data = np.abs(np.diff(self.data, axis=1))
 
     def rotate(self):
-        # Rotate 90 degrees clockwise
         self.data = np.rot90(self.data, k=3)
 
     def salt_n_pepper(self):
@@ -51,19 +49,16 @@ class Img:
         salt_amount = int(0.15 * total_pixels)
         pepper_amount = int(0.15 * total_pixels)
 
-        # Salt (white pixels)
         for _ in range(salt_amount):
             i = random.randint(0, height - 1)
             j = random.randint(0, width - 1)
             self.data[i, j] = 1.0
 
-        # Pepper (black pixels)
         for _ in range(pepper_amount):
             i = random.randint(0, height - 1)
             j = random.randint(0, width - 1)
             self.data[i, j] = 0.0
 
-        # בדיקה - כמה פיקסלים לבנים יש בפועל
         white_pixels = np.sum(self.data > 0.99)
         white_percentage = white_pixels / total_pixels
         print(f"White pixels added: {white_pixels} out of {total_pixels} ({white_percentage:.2%})")
@@ -77,7 +72,11 @@ class Img:
             new_data = np.vstack((self.data[:, :min_width], other_img.data[:, :min_width]))
 
         self.data = new_data
+        # המרה לרשימה בשביל בדיקות/טסטים שעובדים עם רשימות
+        self.data = self.data.tolist()
 
     def segment(self):
         threshold = 0.5
         self.data = np.where(self.data > threshold, 1.0, 0.0)
+        # המרה לרשימה אחרי סגמנטציה כדי למנוע בעיות בהשוואות
+        self.data = self.data.tolist()
