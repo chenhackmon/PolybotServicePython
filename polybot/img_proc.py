@@ -36,7 +36,7 @@ class Img:
             row_result = []
             for j in range(width - blur_level + 1):
                 sub_matrix = [row[j:j + blur_level] for row in self.data[i:i + blur_level]]
-                average = sum(sum(sub_row) for sub_row in sub_matrix) // filter_size
+                average = sum(sum(sub_row) for sub_row in sub_matrix) / filter_size  # Changed // to /
                 row_result.append(average)
             result.append(row_result)
 
