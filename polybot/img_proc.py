@@ -55,12 +55,21 @@ class Img:
     def salt_n_pepper(self):
         height = len(self.data)
         width = len(self.data[0])
-        amount = int(0.3 * height * width)
+        total_pixels = height * width
+        salt_amount = int(0.15 * total_pixels)
+        pepper_amount = int(0.15 * total_pixels)
 
-        for _ in range(amount):
+        # הוסף פיקסלים לבנים (salt)
+        for _ in range(salt_amount):
             i = random.randint(0, height - 1)
             j = random.randint(0, width - 1)
-            self.data[i][j] = 1.0 if random.random() < 0.5 else 0.0
+            self.data[i][j] = 1.0
+
+        # הוסף פיקסלים שחורים (pepper)
+        for _ in range(pepper_amount):
+            i = random.randint(0, height - 1)
+            j = random.randint(0, width - 1)
+            self.data[i][j] = 0.0
 
     def concat(self, other_img, direction='horizontal'):
         if direction == 'horizontal':
