@@ -82,7 +82,7 @@ class Img:
         threshold = 0.5
         self.data = np.where(self.data > threshold, 1.0, 0.0)
 row[:min_width] for row in other_img.data
-            ]
+
         self.data = new_data
 
     def segment(self):
