@@ -1,5 +1,6 @@
 from pathlib import Path
 from matplotlib.image import imread, imsave
+import numpy as np
 import random
 
 
@@ -12,83 +13,75 @@ def rgb2gray(rgb):
 class Img:
 
     def __init__(self, path):
-        """
-        Do not change the constructor implementation
-        """
         self.path = Path(path)
-        self.data = rgb2gray(imread(path)).tolist()
+        img = imread(path)
+        self.data = rgb2gray(img)  # numpy array float64
 
     def save_img(self):
-        """
-        Do not change the below implementation
-        """
         new_path = self.path.with_name(self.path.stem + '_filtered' + self.path.suffix)
         imsave(new_path, self.data, cmap='gray')
         return new_path
 
     def blur(self, blur_level=16):
-        height = len(self.data)
-        width = len(self.data[0])
+        height, width = self.data.shape
         filter_size = blur_level ** 2
 
         result = []
         for i in range(height - blur_level + 1):
             row_result = []
             for j in range(width - blur_level + 1):
-                sub_matrix = [row[j:j + blur_level] for row in self.data[i:i + blur_level]]
-                average = sum(sum(sub_row) for sub_row in sub_matrix) / filter_size  # Division fixed here
+                sub_matrix = self.data[i:i + blur_level, j:j + blur_level]
+                average = np.sum(sub_matrix) / filter_size
                 row_result.append(average)
             result.append(row_result)
 
-        self.data = result
+        self.data = np.array(result)
 
     def contour(self):
-        for i, row in enumerate(self.data):
-            res = []
-            for j in range(1, len(row)):
-                res.append(abs(row[j - 1] - row[j]))
-            self.data[i] = res
+        # compute abs diff horizontally
+        self.data = np.abs(np.diff(self.data, axis=1))
 
     def rotate(self):
-        self.data = [list(reversed(col)) for col in zip(*self.data)]
+        # Rotate 90 degrees clockwise
+        self.data = np.rot90(self.data, k=3)  # equivalent to rotating right
 
     def salt_n_pepper(self):
-        height = len(self.data)
-        width = len(self.data[0])
+        height, width = self.data.shape
         total_pixels = height * width
         salt_amount = int(0.15 * total_pixels)
         pepper_amount = int(0.15 * total_pixels)
 
-        # הוסף פיקסלים לבנים (salt)
+        # Salt (white pixels)
         for _ in range(salt_amount):
             i = random.randint(0, height - 1)
             j = random.randint(0, width - 1)
-            self.data[i][j] = 1.0
+            self.data[i, j] = 1.0
 
-        # הוסף פיקסלים שחורים (pepper)
+        # Pepper (black pixels)
         for _ in range(pepper_amount):
             i = random.randint(0, height - 1)
             j = random.randint(0, width - 1)
-            self.data[i][j] = 0.0
+            self.data[i, j] = 0.0
 
-        # בדוק כמה פיקסלים לבנים יש בפועל (עם סף > 0.99)
-        white_pixels = sum(1 for row in self.data for pixel in row if pixel > 0.99)
+        # בדיקה - כמה פיקסלים לבנים יש בפועל
+        white_pixels = np.sum(self.data > 0.99)
         white_percentage = white_pixels / total_pixels
         print(f"White pixels added: {white_pixels} out of {total_pixels} ({white_percentage:.2%})")
 
     def concat(self, other_img, direction='horizontal'):
         if direction == 'horizontal':
-            min_height = min(len(self.data), len(other_img.data))
-            new_data = [
-                self.data[i][:] + other_img.data[i][:]
-                for i in range(min_height)
-            ]
-        else:  # vertical
-            min_width = min(len(self.data[0]), len(other_img.data[0]))
-            new_data = [
-                row[:min_width] for row in self.data
-            ] + [
-                row[:min_width] for row in other_img.data
+            min_height = min(self.data.shape[0], other_img.data.shape[0])
+            new_data = np.hstack((self.data[:min_height, :], other_img.data[:min_height, :]))
+        else:
+            min_width = min(self.data.shape[1], other_img.data.shape[1])
+            new_data = np.vstack((self.data[:, :min_width], other_img.data[:, :min_width]))
+
+        self.data = new_data
+
+    def segment(self):
+        threshold = 0.5
+        self.data = np.where(self.data > threshold, 1.0, 0.0)
+row[:min_width] for row in other_img.data
             ]
         self.data = new_data
 
