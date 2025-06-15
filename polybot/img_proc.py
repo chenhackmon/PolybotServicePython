@@ -29,14 +29,14 @@ class Img:
     def blur(self, blur_level=16):
         height = len(self.data)
         width = len(self.data[0])
-        filter_sum = blur_level ** 2
+        filter_size = blur_level ** 2
 
         result = []
         for i in range(height - blur_level + 1):
             row_result = []
             for j in range(width - blur_level + 1):
                 sub_matrix = [row[j:j + blur_level] for row in self.data[i:i + blur_level]]
-                average = sum(sum(sub_row) for sub_row in sub_matrix) // filter_sum
+                average = sum(sum(sub_row) for sub_row in sub_matrix) // filter_size
                 row_result.append(average)
             result.append(row_result)
 
@@ -53,3 +53,31 @@ class Img:
         self.data = [list(reversed(col)) for col in zip(*self.data)]
 
     def salt_n_pepper(self):
+        height = len(self.data)
+        width = len(self.data[0])
+        amount = int(0.3 * height * width)
+
+        for _ in range(amount):
+            i = random.randint(0, height - 1)
+            j = random.randint(0, width - 1)
+            self.data[i][j] = 1.0 if random.random() < 0.5 else 0.0
+
+    def concat(self, other_img, direction='horizontal'):
+        if direction == 'horizontal':
+            min_height = min(len(self.data), len(other_img.data))
+            new_data = [
+                self.data[i][:] + other_img.data[i][:]
+                for i in range(min_height)
+            ]
+        else:  # vertical
+            min_width = min(len(self.data[0]), len(other_img.data[0]))
+            new_data = [
+                row[:min_width] for row in self.data
+            ] + [
+                row[:min_width] for row in other_img.data
+            ]
+        self.data = new_data
+
+    def segment(self):
+        threshold = 0.5
+        self.data = [[1.0 if pixel > threshold else 0.0 for pixel in row] for row in self.data]
